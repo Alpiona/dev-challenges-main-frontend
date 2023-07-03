@@ -1,6 +1,7 @@
 "use client";
 
 import { Button, Flex, Image, Spacer, Text } from "@chakra-ui/react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ScriptProps } from "next/script";
 import React from "react";
@@ -34,7 +35,9 @@ const TopNavbar: React.FC<ScriptProps> = () => {
         rounded="0"
         variant="unstyled"
       >
-        <Text as="b">{"Browse Games"}</Text>
+        <Link href="/">
+          <Text as="b">{"Browse Games"}</Text>
+        </Link>
       </Button>
       <SearchInput />
 

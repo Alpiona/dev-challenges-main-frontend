@@ -9,7 +9,11 @@ import {
 } from "@chakra-ui/react";
 import React from "react";
 
-const UserMenu: React.FC = () => {
+type UserMenuProps = {
+  accessType: string;
+};
+
+const UserMenu: React.FC<UserMenuProps> = ({ accessType }) => {
   return (
     <Menu>
       <MenuButton
@@ -34,20 +38,26 @@ const UserMenu: React.FC = () => {
           borderColor="gray.300"
           bgColor="gray.100"
         >
-          <MenuItem>My Library</MenuItem>
+          <MenuItem as="a" href="/library">
+            My Library
+          </MenuItem>
         </MenuGroup>
-        <MenuGroup
-          title="CREATE"
-          m={0}
-          py="7px"
-          px="3"
-          borderTopWidth={1}
-          borderBottomWidth={1}
-          borderColor="gray.300"
-          bgColor="gray.100"
-        >
-          <MenuItem>Create new game</MenuItem>
-        </MenuGroup>
+        {accessType === "developer" && (
+          <MenuGroup
+            title="CREATE"
+            m={0}
+            py="7px"
+            px="3"
+            borderTopWidth={1}
+            borderBottomWidth={1}
+            borderColor="gray.300"
+            bgColor="gray.100"
+          >
+            <MenuItem as="a" href="/new-game">
+              Create new game
+            </MenuItem>
+          </MenuGroup>
+        )}
         <MenuGroup
           title="ACCOUNT"
           m={0}

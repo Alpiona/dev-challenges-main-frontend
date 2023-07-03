@@ -1,7 +1,8 @@
 import { atom } from "recoil";
 
 export interface UserState {
-  name: string;
+  username: string;
+  accessType: string;
 }
 
 export const userState = atom<UserState | null>({
