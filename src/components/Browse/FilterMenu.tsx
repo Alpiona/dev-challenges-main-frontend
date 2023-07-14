@@ -1,3 +1,6 @@
+import { useApi } from "@/hooks/useApi";
+import { GameService } from "@/services/Game/GameService";
+import { Genre } from "@/services/Game/GameType";
 import {
   Accordion,
   AccordionButton,
@@ -10,10 +13,28 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import React from "react";
+import sub from "date-fns/sub";
+import React, { useEffect, useState } from "react";
 import { TiShoppingCart, TiStar, TiStopwatch } from "react-icons/ti";
 
-const FilterMenu: React.FC = () => {
+type FilterMenuProps = {
+  onFilterUpdate: (data: Record<string, unknown>) => void;
+};
+
+const FilterMenu: React.FC<FilterMenuProps> = ({ onFilterUpdate }) => {
+  const [genres, setGenres] = useState<Genre[]>([]);
+  const getGenresApi = useApi(GameService.getGenres);
+
+  useEffect(() => {
+    getGenresApi.request();
+  }, []);
+
+  useEffect(() => {
+    if (getGenresApi.success && getGenresApi.data) {
+      setGenres(getGenresApi.data);
+    }
+  }, [getGenresApi.data]);
+
   return (
     <VStack width="300px">
       <Text as="b" my={2} alignSelf="start" mx={3} mt={3}>
@@ -39,6 +60,9 @@ const FilterMenu: React.FC = () => {
                 gap={3}
                 alignItems="center"
                 height="auto"
+                onClick={() => {
+                  onFilterUpdate({ maxPrice: 0 });
+                }}
               >
                 <Icon boxSize={4} as={TiStar} />
                 <Text fontWeight="400">{"Free"}</Text>
@@ -57,6 +81,9 @@ const FilterMenu: React.FC = () => {
                 gap={3}
                 alignItems="center"
                 height="auto"
+                onClick={() => {
+                  onFilterUpdate({ hasBought: true });
+                }}
               >
                 <Icon boxSize={4} as={TiShoppingCart} />
                 <Text fontWeight="400">{"Paid"}</Text>
@@ -66,6 +93,9 @@ const FilterMenu: React.FC = () => {
                 gap={3}
                 alignItems="center"
                 height="auto"
+                onClick={() => {
+                  onFilterUpdate({ maxPrice: 5 });
+                }}
               >
                 <Icon boxSize={4} as={TiShoppingCart} />
                 <Text fontWeight="400">{"$5 or less"}</Text>
@@ -75,6 +105,9 @@ const FilterMenu: React.FC = () => {
                 gap={3}
                 alignItems="center"
                 height="auto"
+                onClick={() => {
+                  onFilterUpdate({ maxPrice: 15 });
+                }}
               >
                 <Icon boxSize={4} as={TiShoppingCart} />
                 <Text fontWeight="400">{"$15 or less"}</Text>
@@ -96,6 +129,11 @@ const FilterMenu: React.FC = () => {
                 gap={3}
                 alignItems="center"
                 height="auto"
+                onClick={() => {
+                  onFilterUpdate({
+                    createdAt: sub(new Date(), { days: 1 }).toISOString(),
+                  });
+                }}
               >
                 <Icon boxSize={4} as={TiStopwatch} />
                 <Text fontWeight="400">{"Last Day"}</Text>
@@ -105,6 +143,11 @@ const FilterMenu: React.FC = () => {
                 gap={3}
                 alignItems="center"
                 height="auto"
+                onClick={() => {
+                  onFilterUpdate({
+                    createdAt: sub(new Date(), { days: 7 }).toISOString(),
+                  });
+                }}
               >
                 <Icon boxSize={4} as={TiStopwatch} />
                 <Text fontWeight="400">{"Last 7 days"}</Text>
@@ -114,6 +157,11 @@ const FilterMenu: React.FC = () => {
                 gap={3}
                 alignItems="center"
                 height="auto"
+                onClick={() => {
+                  onFilterUpdate({
+                    createdAt: sub(new Date(), { days: 30 }).toISOString(),
+                  });
+                }}
               >
                 <Icon boxSize={4} as={TiStopwatch} />
                 <Text fontWeight="400">{"Last 30 days"}</Text>
@@ -130,15 +178,23 @@ const FilterMenu: React.FC = () => {
           </AccordionButton>
           <AccordionPanel gap={3}>
             <VStack alignItems="start" gap={5}>
-              <Button
-                bgColor="gray.200"
-                gap={3}
-                alignItems="center"
-                height="auto"
-              >
-                <Icon boxSize={4} as={TiStopwatch} />
-                <Text fontWeight="400">{"Last Day"}</Text>
-              </Button>
+              {genres.map((genre) => (
+                <Button
+                  key={genre.id}
+                  bgColor="gray.200"
+                  gap={3}
+                  alignItems="center"
+                  height="auto"
+                  onClick={() => {
+                    onFilterUpdate({
+                      genre: genre.id,
+                    });
+                  }}
+                >
+                  <Icon boxSize={4} as={TiStar} />
+                  <Text fontWeight="400">{genre.name}</Text>
+                </Button>
+              ))}
             </VStack>
           </AccordionPanel>
         </AccordionItem>

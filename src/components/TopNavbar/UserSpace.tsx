@@ -6,13 +6,14 @@ import NextLink from "next/link";
 import React, { useEffect } from "react";
 import { useCookies } from "react-cookie";
 import { FaUser } from "react-icons/fa";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useResetRecoilState } from "recoil";
 import UserMenu from "./UserMenu";
 
 const UserSpace: React.FC = () => {
   const [user, setUser] = useRecoilState(userState);
   const [cookies] = useCookies(["token"]);
   const getSessionApi = useApi(UserService.getSession);
+  const resetUser = useResetRecoilState(userState);
 
   useEffect(() => {
     if (!user && cookies.token) {
@@ -21,13 +22,14 @@ const UserSpace: React.FC = () => {
       };
 
       fetchApi();
+    } else if (user && !cookies.token) {
+      resetUser();
     }
   }, []);
 
   useEffect(() => {
     if (getSessionApi.data) {
       const { username, accessType } = getSessionApi.data;
-      console.log(getSessionApi.data);
       setUser({ username, accessType });
     }
   }, [getSessionApi.data]);

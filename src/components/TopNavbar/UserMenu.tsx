@@ -42,7 +42,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ accessType }) => {
             My Library
           </MenuItem>
         </MenuGroup>
-        {accessType === "developer" && (
+        {accessType === "DEVELOPER" && (
           <MenuGroup
             title="CREATE"
             m={0}

@@ -1,20 +1,25 @@
+import { Game } from "@/services/Game/GameType";
 import { Box, Image, Text, VStack } from "@chakra-ui/react";
 import React from "react";
 
-const GameInfo: React.FC = () => {
+type GameInfoProps = {
+  game: Game;
+};
+
+const GameInfo: React.FC<GameInfoProps> = ({ game }) => {
   return (
     <Box>
       <VStack alignItems="start" fontSize={15} gap={1}>
         <Image
-          src="/placeholder-thumb.jpg"
+          src={game.coverImageUrl}
           width="200px"
           height="200px"
-          alt="test"
+          alt="CoverImage"
         />
         <Text as="b" fontSize={15} textColor="gray.700">
-          Game Title
+          {game.title}
         </Text>
-        <Text textColor="gray.600">Author</Text>
+        <Text textColor="gray.600">{game.authorUsername}</Text>
       </VStack>
     </Box>
   );

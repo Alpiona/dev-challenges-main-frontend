@@ -1,26 +1,130 @@
 "use client";
 
-import { ChevronDownIcon } from "@chakra-ui/icons";
+import BuildsViewer from "@/components/NewGame/BuildsViewer";
+import CoverImageViewer from "@/components/NewGame/CoverImageViewer";
+import GenresMultiSelect from "@/components/NewGame/GenresMultiSelect";
+import ScreenShotsViewer from "@/components/NewGame/ScreenShotsViewer";
+import { useApi } from "@/hooks/useApi";
+import { FileService } from "@/services/File/FileService";
+import { GameService } from "@/services/Game/GameService";
+import { Genre } from "@/services/Game/GameType";
 import {
   Button,
   Center,
-  Checkbox,
   Flex,
+  FormControl,
   Input,
-  Menu,
-  MenuButton,
-  MenuItemOption,
-  MenuList,
-  MenuOptionGroup,
+  NumberInput,
+  NumberInputField,
+  Radio,
+  RadioGroup,
   Select,
   Text,
   Textarea,
   VStack,
+  useToast,
 } from "@chakra-ui/react";
-import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
+
+export type ScreenShotState = { fileName: string; url: string };
+
+export type BuildState = {
+  fileName: string;
+  operatingSystem: string;
+  size: string;
+  url: string;
+  version: string;
+};
 
 const NewGamePage: React.FC = () => {
-  const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+  const [redirectSeconds, setRedirectSeconds] = useState<number>(3);
+  const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
+  const [screenShots, setScreenShots] = useState<ScreenShotState[]>([]);
+  const [builds, setBuilds] = useState<BuildState[]>([]);
+  const [selectedGenres, setSelectedGenres] = useState<Genre[]>([]);
+  const [gameForm, setGameForm] = useState({
+    title: "",
+    description: "",
+    projectUrl: "",
+    tagline: "",
+    status: "",
+    price: "0",
+    priceType: "",
+  });
+
+  const toast = useToast();
+  const router = useRouter();
+
+  const uploadFileApi = useApi(FileService.uploadFile);
+  const createGameApi = useApi(GameService.createGame);
+
+  const handleSubmit = () => {
+    if (!coverImageFile) {
+      return;
+    }
+
+    uploadFileApi.request({
+      file: coverImageFile,
+      type: "GAME_COVER_IMAGE",
+    });
+  };
+
+  const onChange = (
+    event: React.ChangeEvent<
+      HTMLTextAreaElement | HTMLSelectElement | HTMLInputElement
+    >
+  ) => {
+    setGameForm((prev) => ({
+      ...prev,
+      [event.target.name]: event.target.value,
+    }));
+  };
+
+  useEffect(() => {
+    if (uploadFileApi.success) {
+      const { fileName: coverImageFileName } = uploadFileApi.data!;
+
+      const fetchApi = async () => {
+        await createGameApi.request({
+          ...gameForm,
+          price: gameForm.priceType === "free" ? 0 : Number(gameForm.price),
+          images: screenShots.map((screenShot) => screenShot.fileName),
+          coverImage: coverImageFileName,
+          genresIds: selectedGenres.map((genre) => genre.id),
+          builds: builds.map((build) => build.fileName),
+        });
+      };
+
+      fetchApi();
+    }
+  }, [uploadFileApi.data]);
+
+  useEffect(() => {
+    if (createGameApi.success) {
+      setTimeout(() => {
+        setRedirectSeconds((redirectSeconds) => redirectSeconds - 1);
+      }, 1000);
+    }
+
+    if (redirectSeconds === 0) {
+      const { platformUrlPath } = createGameApi.data!;
+      router.push(`/${platformUrlPath}`);
+    }
+  }, [createGameApi.success, redirectSeconds]);
+
+  useEffect(() => {
+    if (createGameApi.success) {
+      toast({
+        title: "Success",
+        description:
+          "Your game page was created! You will be redirected to the page",
+        status: "success",
+        duration: 9000,
+        isClosable: true,
+      });
+    }
+  }, [createGameApi.success]);
 
   return (
     <Center>
@@ -40,7 +144,7 @@ const NewGamePage: React.FC = () => {
           p={2}
         >
           <Text as="b" ml={5} width="full" textColor="gray.500">
-            Dashboard
+            {"Dashboard"}
           </Text>
         </Center>
         <Center
@@ -51,165 +155,152 @@ const NewGamePage: React.FC = () => {
           borderColor="gray.300"
         >
           <Text as="b" ml={5} width="full" textColor="gray.600" fontSize={20}>
-            Create a new game
+            {"Create a new game"}
           </Text>
         </Center>
         <Flex width="full" p={7} gap={5} fontSize={14} textColor="gray.600">
           <VStack alignItems="start" width="60%" gap={7}>
-            <VStack alignItems="start" gap={1} width="full">
-              <Text as="b">Title</Text>
-              <Input onChange={() => {}} size="sm" borderWidth={2} />
-            </VStack>
-            <VStack alignItems="start" gap={1} width="full">
-              <Text as="b">Project URL</Text>
+            <FormControl>
+              <Text as="b">{"Title"}</Text>
               <Input
-                onChange={() => {}}
+                name="title"
+                onChange={onChange}
+                size="sm"
+                borderWidth={2}
+              />
+            </FormControl>
+
+            <FormControl>
+              <Text as="b">{"Project URL"}</Text>
+              <Input
+                onChange={onChange}
+                name="projectUrl"
                 placeholder="https://localhost:3000/"
                 size="sm"
                 borderWidth={2}
               />
-            </VStack>
-            <VStack alignItems="start" gap={1} width="full">
-              <Text as="b">Short description or tagline</Text>
+            </FormControl>
+
+            <FormControl>
+              <Text as="b">{"Short description or tagline"}</Text>
               <Text>
-                {
-                  "Shown when we link to your pojects. Avoid duplicating your project's title"
-                }
+                {"Shown when we link to your projects. Avoid duplicating " +
+                  "your project's title"}
               </Text>
               <Input
-                onChange={() => {}}
+                onChange={onChange}
+                name="tagline"
                 placeholder="Optional"
                 size="sm"
                 borderWidth={2}
               />
-            </VStack>
-            <VStack alignItems="start" gap={1} width="full">
-              <Text as="b">Release status</Text>
-              <Select>
-                <option value="option1">Released</option>
-                <option value="option2">Early Access</option>
+            </FormControl>
+
+            <FormControl>
+              <Text as="b">{"Release status"}</Text>
+              <Select name="status" onChange={onChange}>
+                <option selected value="Released">
+                  {"Released"}
+                </option>
+                <option value="Early Access">{"Early Access"}</option>
               </Select>
-            </VStack>
-            <VStack alignItems="start" gap={5} width="full" mt={5}>
-              <Text as="b" fontSize={20}>
-                Pricing
-              </Text>
-              <Flex width="full" gap={3}>
-                <Flex
-                  width="50%"
-                  borderWidth={2}
-                  height="30px"
-                  p={2}
-                  alignItems="center"
-                >
-                  <Checkbox colorScheme="red" />
-                  <Center width="full">
-                    <Text alignSelf="center">$0</Text>
-                  </Center>
+            </FormControl>
+
+            <Text as="b" fontSize={20}>
+              {"Pricing"}
+            </Text>
+            <FormControl>
+              <RadioGroup name="priceType">
+                <Flex width="full" gap={3}>
+                  <Flex
+                    width="50%"
+                    borderWidth={2}
+                    height="30px"
+                    p={2}
+                    alignItems="center"
+                  >
+                    <Radio value="free" onChange={onChange} />
+                    <Center width="full">
+                      <Text alignSelf="center">$0</Text>
+                    </Center>
+                  </Flex>
+                  <Flex
+                    width="50%"
+                    borderWidth={2}
+                    height="30px"
+                    p={2}
+                    alignItems="center"
+                  >
+                    <Radio value="paid" onChange={onChange} />
+
+                    <Center width="full">
+                      <Text alignSelf="center">{"Paid"}</Text>
+                    </Center>
+                  </Flex>
                 </Flex>
-                <Flex
-                  width="50%"
-                  borderWidth={2}
-                  height="30px"
-                  p={2}
-                  alignItems="center"
-                >
-                  <Checkbox colorScheme="red" />
-                  <Center width="full">
-                    <Text alignSelf="center">Paid</Text>
-                  </Center>
-                </Flex>
-              </Flex>
-            </VStack>
+              </RadioGroup>
+            </FormControl>
+            {gameForm.priceType === "paid" && (
+              <NumberInput
+                name="price"
+                onChange={(value) =>
+                  setGameForm((prev) => ({
+                    ...prev,
+                    price: value.replace(/^\$/, ""),
+                  }))
+                }
+                value={`$${gameForm.price}`}
+              >
+                <NumberInputField />
+              </NumberInput>
+            )}
 
-            <VStack alignItems="start" gap={5} width="full" mt={5}>
-              <Text as="b" fontSize={20}>
-                Uploads
-              </Text>
+            <BuildsViewer builds={builds} setBuilds={setBuilds} />
 
-              <Button bgColor="red" textColor="white">
-                Upload files
-              </Button>
-              <Text>File size limit: 1GB.</Text>
-            </VStack>
-
-            <VStack alignItems="start" gap={2} width="full" mt={5}>
+            <FormControl>
               <Text as="b" fontSize={20} mb={2}>
-                Details
+                {"Details"}
               </Text>
               <Text>
-                Description - This will make up the content of your game page.
+                {"Description - This will make up the content of your " +
+                  "game page."}
               </Text>
-              <Textarea />
-            </VStack>
+              <Textarea name="description" onChange={onChange} />
+            </FormControl>
 
-            <VStack alignItems="start" gap={1} width="full">
-              <Text as="b">Genre</Text>
+            <FormControl>
+              <Text as="b">{"Genre"}</Text>
               <Text>
-                Select the category that best describes your game. You can pick
-                additional genres with tags below
+                {"Select the category that best describes your game. You " +
+                  "can pick additional genres with tags below"}
               </Text>
               <Flex width="full">
-                <Menu closeOnSelect={false}>
-                  <MenuButton
-                    as={Button}
-                    width="full"
-                    bgColor="white"
-                    borderColor="gray.300"
-                    borderWidth={2}
-                    rightIcon={<ChevronDownIcon />}
-                    textAlign="start"
-                  >
-                    {selectedGenres.join(", ") || "No genre"}
-                  </MenuButton>
-                  <MenuList width="full">
-                    <MenuOptionGroup
-                      type="checkbox"
-                      onChange={setSelectedGenres as any}
-                    >
-                      <MenuItemOption value="Horror">Horror</MenuItemOption>
-                      <MenuItemOption value="Adventure">
-                        Adventure
-                      </MenuItemOption>
-                      <MenuItemOption value="RPG">RPG</MenuItemOption>
-                    </MenuOptionGroup>
-                  </MenuList>
-                </Menu>
+                <GenresMultiSelect
+                  genres={selectedGenres}
+                  setGenres={setSelectedGenres}
+                />
               </Flex>
-            </VStack>
-            <Button bgColor="red" textColor="white" mt={4}>
-              Save & view page
+            </FormControl>
+            <Button
+              bgColor="red"
+              textColor="white"
+              mt={4}
+              onClick={handleSubmit}
+              isLoading={uploadFileApi.loading || createGameApi.loading}
+            >
+              {"Save & view page"}
             </Button>
           </VStack>
 
           <VStack alignItems="start" width="40%" gap={5}>
-            <Center
-              width="full"
-              height="300px"
-              border="dashed"
-              borderColor="gray.400"
-              borderWidth={1}
-            >
-              <Button bgColor="red" textColor="white">
-                Upload Cover Image
-              </Button>
-            </Center>
-            <Text>
-              The cover image is used whenever itch.io wants to link to your
-              project from another part of the site. Required (Minimum: 315x250,
-              Recommended: 630:500)
-            </Text>
-            <VStack alignItems="start">
-              <Text as="b">Screenshots</Text>
-              <Text>
-                {
-                  "Screenshots will appear on your game's page. Optional but highly recommended. Upload 3 to 5 for best results"
-                }
-              </Text>
-            </VStack>
-            <Button bgColor="red" textColor="white">
-              Add screenshots
-            </Button>
+            <CoverImageViewer
+              setCoverImage={setCoverImageFile}
+              coverImage={coverImageFile}
+            />
+            <ScreenShotsViewer
+              setScreenShots={setScreenShots}
+              screenShots={screenShots}
+            />
           </VStack>
         </Flex>
       </VStack>

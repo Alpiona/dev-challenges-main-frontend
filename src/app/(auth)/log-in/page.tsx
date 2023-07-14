@@ -50,6 +50,7 @@ export default function LogIn() {
       setCookie("token", logInApi.data.token, {
         path: "/",
         expires: new Date(logInApi.data.expiresAt),
+        sameSite: "strict",
       });
 
       setUser({
@@ -100,6 +101,7 @@ export default function LogIn() {
               <FormLabel>{"Password:"}</FormLabel>
               <Input
                 name="password"
+                type="password"
                 onChange={onChange}
                 placeholder="Required"
                 size="sm"
