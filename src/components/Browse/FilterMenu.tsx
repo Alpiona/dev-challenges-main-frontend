@@ -19,9 +19,13 @@ import { TiShoppingCart, TiStar, TiStopwatch } from "react-icons/ti";
 
 type FilterMenuProps = {
   onFilterUpdate: (data: Record<string, unknown>) => void;
+  isLoading: boolean;
 };
 
-const FilterMenu: React.FC<FilterMenuProps> = ({ onFilterUpdate }) => {
+const FilterMenu: React.FC<FilterMenuProps> = ({
+  onFilterUpdate,
+  isLoading,
+}) => {
   const [genres, setGenres] = useState<Genre[]>([]);
   const getGenresApi = useApi(GameService.getGenres);
 
@@ -63,6 +67,7 @@ const FilterMenu: React.FC<FilterMenuProps> = ({ onFilterUpdate }) => {
                 onClick={() => {
                   onFilterUpdate({ maxPrice: 0 });
                 }}
+                isDisabled={isLoading}
               >
                 <Icon boxSize={4} as={TiStar} />
                 <Text fontWeight="400">{"Free"}</Text>
@@ -72,6 +77,10 @@ const FilterMenu: React.FC<FilterMenuProps> = ({ onFilterUpdate }) => {
                 gap={3}
                 alignItems="center"
                 height="auto"
+                onClick={() => {
+                  onFilterUpdate({ onSale: true });
+                }}
+                isDisabled={isLoading}
               >
                 <Icon boxSize={4} as={TiStar} />
                 <Text fontWeight="400">{"On Sale"}</Text>
@@ -84,6 +93,7 @@ const FilterMenu: React.FC<FilterMenuProps> = ({ onFilterUpdate }) => {
                 onClick={() => {
                   onFilterUpdate({ hasBought: true });
                 }}
+                isDisabled={isLoading}
               >
                 <Icon boxSize={4} as={TiShoppingCart} />
                 <Text fontWeight="400">{"Paid"}</Text>
@@ -96,6 +106,7 @@ const FilterMenu: React.FC<FilterMenuProps> = ({ onFilterUpdate }) => {
                 onClick={() => {
                   onFilterUpdate({ maxPrice: 5 });
                 }}
+                isDisabled={isLoading}
               >
                 <Icon boxSize={4} as={TiShoppingCart} />
                 <Text fontWeight="400">{"$5 or less"}</Text>
@@ -108,6 +119,7 @@ const FilterMenu: React.FC<FilterMenuProps> = ({ onFilterUpdate }) => {
                 onClick={() => {
                   onFilterUpdate({ maxPrice: 15 });
                 }}
+                isDisabled={isLoading}
               >
                 <Icon boxSize={4} as={TiShoppingCart} />
                 <Text fontWeight="400">{"$15 or less"}</Text>
@@ -134,6 +146,7 @@ const FilterMenu: React.FC<FilterMenuProps> = ({ onFilterUpdate }) => {
                     createdAt: sub(new Date(), { days: 1 }).toISOString(),
                   });
                 }}
+                isDisabled={isLoading}
               >
                 <Icon boxSize={4} as={TiStopwatch} />
                 <Text fontWeight="400">{"Last Day"}</Text>
@@ -148,6 +161,7 @@ const FilterMenu: React.FC<FilterMenuProps> = ({ onFilterUpdate }) => {
                     createdAt: sub(new Date(), { days: 7 }).toISOString(),
                   });
                 }}
+                isDisabled={isLoading}
               >
                 <Icon boxSize={4} as={TiStopwatch} />
                 <Text fontWeight="400">{"Last 7 days"}</Text>
@@ -162,6 +176,7 @@ const FilterMenu: React.FC<FilterMenuProps> = ({ onFilterUpdate }) => {
                     createdAt: sub(new Date(), { days: 30 }).toISOString(),
                   });
                 }}
+                isDisabled={isLoading}
               >
                 <Icon boxSize={4} as={TiStopwatch} />
                 <Text fontWeight="400">{"Last 30 days"}</Text>
@@ -190,6 +205,7 @@ const FilterMenu: React.FC<FilterMenuProps> = ({ onFilterUpdate }) => {
                       genre: genre.id,
                     });
                   }}
+                  isDisabled={isLoading}
                 >
                   <Icon boxSize={4} as={TiStar} />
                   <Text fontWeight="400">{genre.name}</Text>

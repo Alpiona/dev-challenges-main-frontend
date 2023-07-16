@@ -45,7 +45,12 @@ const BuildsViewer: React.FC<BuildsViewerProps> = ({ builds, setBuilds }) => {
         {"Uploads"}
       </Text>
 
-      <Button bgColor="red" textColor="white" onClick={onOpen}>
+      <Button
+        bgColor="red"
+        textColor="white"
+        onClick={onOpen}
+        isLoading={uploadBuildApi.loading}
+      >
         {"Upload files"}
       </Button>
       <Text>{"File size limit: 1GB."}</Text>

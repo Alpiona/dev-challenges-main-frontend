@@ -19,7 +19,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function SingUp() {
-  const [redirectSeconds, setRedirectSeconds] = useState<number>(5);
+  const [redirectSeconds, setRedirectSeconds] = useState<number>(3);
   const [signUpForm, setSignUpForm] = useState({
     username: "",
     email: "",

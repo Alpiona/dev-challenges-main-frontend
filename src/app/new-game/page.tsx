@@ -48,7 +48,7 @@ const NewGamePage: React.FC = () => {
     description: "",
     projectUrl: "",
     tagline: "",
-    status: "",
+    status: "Released",
     price: "0",
     priceType: "",
   });
@@ -232,7 +232,6 @@ const NewGamePage: React.FC = () => {
                     alignItems="center"
                   >
                     <Radio value="paid" onChange={onChange} />
-
                     <Center width="full">
                       <Text alignSelf="center">{"Paid"}</Text>
                     </Center>

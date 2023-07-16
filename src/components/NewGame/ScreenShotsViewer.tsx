@@ -56,6 +56,7 @@ const ScreenShotsViewer: React.FC<ScreenShotsViewerProps> = ({
         bgColor="red"
         textColor="white"
         onClick={() => screenShotInputRef.current!.click()}
+        isLoading={uploadFileApi.loading}
       >
         {"Add screenshots"}
       </Button>

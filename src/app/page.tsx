@@ -6,11 +6,15 @@ import { useApi } from "@/hooks/useApi";
 import { GameService } from "@/services/Game/GameService";
 import { Game } from "@/services/Game/GameType";
 import { Flex } from "@chakra-ui/react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function Home() {
   const [games, setGames] = useState<Game[]>([]);
+
   const getGamesApi = useApi(GameService.getGamesList);
+
+  const {} = useRouter();
 
   const handleFilterUpdate = (data: Record<string, unknown>) => {
     getGamesApi.request(data);
@@ -28,7 +32,10 @@ export default function Home() {
 
   return (
     <Flex>
-      <FilterMenu onFilterUpdate={handleFilterUpdate} />
+      <FilterMenu
+        onFilterUpdate={handleFilterUpdate}
+        isLoading={getGamesApi.loading}
+      />
       <GameList games={games} />
     </Flex>
   );

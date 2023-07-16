@@ -4,7 +4,8 @@ import GameInfo from "@/components/Library/GameInfo";
 import { useApi } from "@/hooks/useApi";
 import { GameService } from "@/services/Game/GameService";
 import { Game } from "@/services/Game/GameType";
-import { Text, VStack, Wrap, WrapItem } from "@chakra-ui/react";
+import { Link, Text, VStack, Wrap, WrapItem } from "@chakra-ui/react";
+import NextLink from "next/link";
 import React, { useEffect, useState } from "react";
 
 const Library: React.FC = () => {
@@ -37,7 +38,9 @@ const Library: React.FC = () => {
       <Wrap spacing="15px">
         {games.map((game) => (
           <WrapItem key={game.id}>
-            <GameInfo game={game} />
+            <Link as={NextLink} href={`/${game.platformUrlPath}`}>
+              <GameInfo game={game} />
+            </Link>
           </WrapItem>
         ))}
       </Wrap>

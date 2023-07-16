@@ -60,7 +60,10 @@ const GamePage: React.FC = () => {
 
   useEffect(() => {
     onClose();
-    router.refresh();
+
+    if (buyGameApi.success) {
+      setGame((prev) => ({ ...prev, hasBought: true } as Game));
+    }
   }, [buyGameApi.success]);
 
   return (
