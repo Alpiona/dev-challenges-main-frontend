@@ -22,7 +22,7 @@ const GameInfo: React.FC<GameInfoProps> = ({ game }) => {
 
   return (
     <Box>
-      <Link as={NextLink} href={`/${game.platformUrlPath}`}>
+      <Link as={NextLink} href={`/game/${game.platformUrlPath}`}>
         <VStack alignItems="start" fontSize={15} gap={1}>
           <Image
             src={game.coverImageUrl}
