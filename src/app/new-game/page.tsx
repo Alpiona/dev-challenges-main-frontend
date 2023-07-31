@@ -109,7 +109,7 @@ const NewGamePage: React.FC = () => {
 
     if (redirectSeconds === 0) {
       const { platformUrlPath } = createGameApi.data!;
-      router.push(`/${platformUrlPath}`);
+      router.push(`/game/${platformUrlPath}`);
     }
   }, [createGameApi.success, redirectSeconds]);
 
